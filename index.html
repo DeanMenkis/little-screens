@@ -4,153 +4,302 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#fff4ea" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1b1513" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f0eb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#110f0e" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Displays">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Little Screens">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src wss: ; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%8C%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='14' width='56' height='36' rx='9' fill='%23171312'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ff7a66'/%3E%3C/svg%3E">
 <title>Little Screens</title>
 <style>
+  /* ── Tokens ─────────────────────────────────────────────── */
   :root {
-    --bg: #fff4ea; --card: #ffffff; --ink: #3a2a26; --muted: #8a736b;
-    --line: #f0ddd0; --accent: #e8604c; --accent-ink: #ffffff; --accent-soft: #ffe3dc;
-    --ok: #2f9e6b; --warn: #c27a12; --bad: #c8372d;
-    --radius: 18px; --shadow: 0 2px 10px rgba(120, 60, 40, .10);
+    --bg: #f5f0eb;
+    --surface: #fffdfb;
+    --sunk: #efe8e2;
+    --ink: #241d1a;
+    --ink-2: #6f625c;
+    --ink-3: #a99c95;
+    --hair: rgba(36, 29, 26, .08);
+    --accent: #f2614c;
+    --accent-ink: #ffffff;
+    --accent-wash: rgba(242, 97, 76, .10);
+    --ok: #2fa36b;
+    --warn: #c98a1b;
+    --bad: #d9473a;
+    --glass: #141110;
+    --glow: #fff6ef;
+    --r-xl: 26px; --r-l: 18px; --r-m: 14px;
+    --lift: 0 1px 0 rgba(255,255,255,.7) inset, 0 1px 2px rgba(36,29,26,.04), 0 16px 40px -20px rgba(80,40,25,.22);
+    --ease: cubic-bezier(.2,.8,.2,1);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1b1513; --card: #272019; --ink: #f6e9e2; --muted: #b59f96;
-      --line: #3a2e28; --accent: #ff7a64; --accent-ink: #2a1510; --accent-soft: #46271f;
-      --ok: #55d19a; --warn: #f0b250; --bad: #ff7b70; --shadow: 0 2px 10px rgba(0,0,0,.4);
+      --bg: #110f0e; --surface: #1a1716; --sunk: #141211;
+      --ink: #f4ede8; --ink-2: #a4968f; --ink-3: #6e625c;
+      --hair: rgba(255,255,255,.07);
+      --accent: #ff7a66; --accent-ink: #1d0f0b; --accent-wash: rgba(255,122,102,.12);
+      --ok: #5bd39a; --warn: #f0b250; --bad: #ff7b70;
+      --glass: #050404;
+      --lift: 0 1px 0 rgba(255,255,255,.04) inset, 0 20px 50px -24px rgba(0,0,0,.7);
     }
   }
-  * { box-sizing: border-box; }
+
+  /* ── Base ───────────────────────────────────────────────── */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; background: var(--bg); color: var(--ink);
-    font: 17px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font: 16px/1.45 ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+    letter-spacing: -.011em; -webkit-font-smoothing: antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 14px 14px 60px; }
-  header { display: flex; align-items: center; gap: 10px; padding: 6px 2px 14px; }
-  header h1 { font-size: 24px; margin: 0; flex: 1; letter-spacing: -.01em; }
-  header h1 small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
-  .pill { font-size: 13px; padding: 5px 10px; border-radius: 99px; background: var(--card); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-  .pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); }
-  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px; border: 1px solid var(--line); }
-  h2 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
-  label { display: block; font-size: 14px; color: var(--muted); margin: 12px 0 4px; }
-  input[type=text], input[type=password], textarea, select {
-    width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line);
-    border-radius: 12px; padding: 12px 13px; min-height: 48px;
-  }
-  textarea { resize: vertical; min-height: 110px; }
-  input:focus, textarea:focus, select:focus, button:focus-visible { outline: 3px solid var(--accent-soft); border-color: var(--accent); }
-  button {
-    font: inherit; font-weight: 600; min-height: 50px; padding: 0 20px; border-radius: 14px; border: 0; cursor: pointer;
-    background: var(--accent); color: var(--accent-ink); touch-action: manipulation;
-  }
-  button.ghost { background: var(--accent-soft); color: var(--ink); }
-  button.icon { min-height: 40px; width: 40px; padding: 0; border-radius: 99px; font-size: 20px; background: var(--card); color: var(--ink); border: 1px solid var(--line); }
-  button:disabled { opacity: .45; cursor: default; }
-  button.big { width: 100%; font-size: 18px; min-height: 56px; margin-top: 14px; }
-  .row { display: flex; gap: 10px; align-items: center; }
-  .row > * { flex: 1; }
-  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .hint.warn { color: var(--warn); } .hint.bad { color: var(--bad); }
+  .wrap { max-width: 440px; margin: 0 auto; padding: 18px 18px 56px; }
   .hidden { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  svg { display: block; }
 
-  /* displays */
-  .dev { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--bg); color: var(--ink);
-         border: 2px solid transparent; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; min-height: 64px; }
-  .dev[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
-  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); opacity: .5; flex: none; }
-  .dot.on { background: var(--ok); opacity: 1; box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 25%, transparent); }
-  .dev .name { font-weight: 700; display: block; }
-  .dev .sub { font-size: 13px; color: var(--muted); font-weight: 400; display: block; }
-  .dev .grow { flex: 1; min-width: 0; }
-  .dev .grow > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .empty { color: var(--muted); font-size: 15px; padding: 6px 2px; }
+  /* ── Top bar ────────────────────────────────────────────── */
+  header { display: flex; align-items: center; gap: 10px; height: 40px; margin-bottom: 18px; }
+  .mark { flex: 1; font-size: 15px; font-weight: 600; letter-spacing: -.02em; color: var(--ink); display: flex; align-items: center; gap: 8px; margin: 0; }
+  .mark i { width: 18px; height: 12px; border-radius: 4px; background: var(--glass); position: relative; }
+  .mark i::after { content: ""; position: absolute; inset: 3px 6px; border-radius: 2px; background: var(--accent); opacity: .9; }
+  .pill { font-size: 12.5px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; transition: color .3s var(--ease); }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .7; }
+  .pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); }
+  button.icon { width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; background: transparent; color: var(--ink-2); display: grid; place-items: center; }
+  button.icon:hover { background: var(--hair); }
 
-  /* tabs */
-  .tabs { display: flex; gap: 6px; background: var(--bg); padding: 5px; border-radius: 16px; margin-bottom: 14px; }
-  .tabs button { flex: 1; background: transparent; color: var(--muted); min-height: 46px; padding: 0 6px; }
-  .tabs button[aria-selected=true] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  /* ── Surfaces ───────────────────────────────────────────── */
+  .card { background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--lift); padding: 18px; margin-bottom: 14px; }
+  h2 { font-size: 13px; font-weight: 600; color: var(--ink-3); margin: 0 0 14px; letter-spacing: 0; }
 
-  /* oled preview */
-  .screen-wrap { position: relative; width: 100%; max-width: 384px; margin: 12px auto 4px; border-radius: 10px; padding: 10px;
-                 background: #3a2e28; box-shadow: inset 0 0 0 2px #00000030; }
-  canvas.oled { display: block; width: 100%; aspect-ratio: 2 / 1; image-rendering: pixelated; image-rendering: crisp-edges; background: #000; border-radius: 3px; }
-  canvas.oled { image-rendering: pixelated; }
-  .bezel { position: absolute; left: 10px; right: 10px; top: 10px; height: calc((100% - 20px) * 6 / 64); background: repeating-linear-gradient(135deg, #ff4d3d33 0 4px, transparent 4px 8px); pointer-events: none; border-radius: 3px 3px 0 0; }
-  .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-  .counter.over { color: var(--bad); font-weight: 700; }
+  /* ── Controls ───────────────────────────────────────────── */
+  button {
+    font: inherit; font-weight: 600; letter-spacing: -.01em; min-height: 48px; padding: 0 18px; border-radius: 999px; border: 0; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); touch-action: manipulation;
+    transition: transform .18s var(--ease), background-color .2s var(--ease), opacity .2s, box-shadow .2s;
+  }
+  button:active { transform: scale(.97); }
+  button:disabled { opacity: .35; cursor: default; transform: none; }
+  button.ghost { background: var(--sunk); color: var(--ink); }
+  button.big { width: 100%; min-height: 54px; margin-top: 14px; font-size: 16.5px; }
+  button.danger { background: transparent; color: var(--bad); box-shadow: inset 0 0 0 1.5px currentColor; }
+  button.link { background: none; color: var(--ink-3); min-height: 36px; padding: 0 4px; font-weight: 500; }
+  :focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 
-  input[type=range] { width: 100%; accent-color: var(--accent); min-height: 36px; }
-  .check { display: flex; align-items: center; gap: 10px; font-size: 16px; color: var(--ink); margin: 6px 0; min-height: 40px; }
-  .check input { width: 22px; height: 22px; accent-color: var(--accent); }
-  input[type=file] { width: 100%; font: inherit; }
-  .drop { display: block; text-align: center; padding: 22px 12px; border: 2px dashed var(--line); border-radius: 14px; color: var(--muted); cursor: pointer; }
-  .drop strong { color: var(--ink); }
-
-  /* send status */
-  .sendstat { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 15px; }
-  .sendstat.ok { background: color-mix(in srgb, var(--ok) 20%, var(--card)); }
-  .sendstat.bad { background: color-mix(in srgb, var(--bad) 20%, var(--card)); }
-  .bar { height: 6px; border-radius: 3px; background: var(--line); margin-top: 8px; overflow: hidden; }
-  .bar > i { display: block; height: 100%; width: 30%; background: var(--accent); animation: slide 1.1s ease-in-out infinite; }
-  @keyframes slide { 0% { margin-left: -30%; } 100% { margin-left: 100%; } }
-  .link { background: none; color: var(--muted); min-height: 36px; padding: 0 4px; font-weight: 400; text-decoration: underline; }
-
-  /* v2: two clocks */
-  .clock { margin-bottom: 14px; }
-  .clock .top { display: flex; align-items: center; gap: 12px; }
-  .clock .grow { flex: 1; min-width: 0; }
-  .clock .name { font-weight: 700; font-size: 19px; display: block; }
-  .clock .sub { font-size: 14px; color: var(--muted); display: block; }
-  .clock .key { font-size: 12px; color: var(--warn); display: block; margin-top: 2px; }
-  .clock.msg { border-color: var(--accent); }
-  .clock .actions { margin-top: 12px; }
+  label { display: block; font-size: 13px; color: var(--ink-3); margin: 14px 0 6px; font-weight: 500; }
+  input[type=text], input[type=password], textarea, select {
+    width: 100%; font: inherit; color: var(--ink); background: var(--sunk); border: 0; border-radius: var(--r-m);
+    padding: 13px 14px; min-height: 48px; box-shadow: inset 0 0 0 1px var(--hair); transition: box-shadow .2s var(--ease), background .2s;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent); background: var(--surface); }
+  ::placeholder { color: var(--ink-3); }
+  textarea { resize: none; min-height: 96px; }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+           background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 38px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
   .stack > * + * { margin-top: 8px; }
-  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; word-break: break-all; }
-  textarea.mono { min-height: 84px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-  .chip { min-height: 38px; padding: 0 12px; border-radius: 99px; background: var(--accent-soft); color: var(--ink); font-weight: 500; }
-  details > summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 10px 0; min-height: 44px; }
-  button.danger { background: transparent; color: var(--bad); border: 1.5px solid var(--bad); }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; letter-spacing: 0; word-break: break-all; }
+  textarea.mono { min-height: 88px; }
+  .hint { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+  .hint.warn { color: var(--warn); } .hint.bad { color: var(--bad); }
+  .hint:empty { display: none; }
+
+  /* Segmented control */
+  .tabs { display: flex; gap: 2px; background: var(--sunk); padding: 4px; border-radius: 999px; margin-bottom: 16px; box-shadow: inset 0 0 0 1px var(--hair); }
+  .tabs button { flex: 1; min-height: 38px; padding: 0 8px; font-size: 14px; font-weight: 500; background: transparent; color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .tabs button svg { width: 16px; height: 16px; opacity: .8; }
+  .tabs button[aria-selected=true] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 2px 8px -2px rgba(0,0,0,.08); }
+  .tabs button:active { transform: none; }
+  .tabs button { white-space: nowrap; }
+  #setupPanel .tabs button { font-size: 13px; padding: 0 4px; letter-spacing: -.02em; }
+
+  /* ── The two little screens ─────────────────────────────── */
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .clock { background: none; box-shadow: none; padding: 0; margin: 0; }
+  .device {
+    position: relative; aspect-ratio: 2 / 1; border-radius: 16px; padding: 7px;
+    background: linear-gradient(160deg, #2a2421, #120f0e 60%); box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 12px 24px -12px rgba(30,15,10,.55);
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .glass { position: absolute; inset: 7px; border-radius: 10px; background: radial-gradient(120% 90% at 50% 40%, #0d0b0a, #000); overflow: hidden; display: grid; place-items: center; }
+  .glass::after { content: ""; position: absolute; inset: 0; background: linear-gradient(170deg, rgba(255,255,255,.07), transparent 45%); pointer-events: none; }
+  .glyph { width: 38%; height: 56%; color: var(--glow); opacity: 0; transform: scale(.9); transition: opacity .4s var(--ease), transform .4s var(--ease); filter: drop-shadow(0 0 6px rgba(255,240,230,.45)); position: absolute; }
+  .clock[data-mode=TIME] .g-time, .clock[data-mode=GIF] .g-gif, .clock[data-mode=MESSAGE] .g-msg,
+  .clock[data-mode=SPOTIFY] .g-note, .clock[data-mode=CLAUDE] .g-star, .clock[data-mode=off] .g-off, .clock:not([data-mode]) .g-off { opacity: 1; transform: none; }
+  .g-off { width: 18%; opacity: 0; color: #3a3330; filter: none; }
+  .clock[data-mode=MESSAGE] .device { box-shadow: 0 0 0 2px var(--accent), 0 12px 28px -10px rgba(242,97,76,.55); }
+  .who { display: flex; align-items: center; gap: 7px; margin: 11px 2px 0; }
+  .who .name { font-size: 14.5px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); opacity: .5; flex: none; transition: background .3s, box-shadow .3s; }
+  .dot.on { background: var(--ok); opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
+  .sub { display: block; font-size: 12.5px; color: var(--ink-3); margin: 2px 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key { display: block; font-size: 12px; color: var(--warn); margin: 2px; }
+  .actions { display: flex; gap: 6px; margin-top: 10px; }
+  .actions button { flex: 1; min-height: 34px; padding: 0 10px; font-size: 13px; font-weight: 500; background: var(--surface); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--hair); }
+  .actions button:hover { color: var(--ink); }
+  .clock.msg .actions button { background: var(--accent-wash); color: var(--accent); box-shadow: none; }
+  .clock .sendstat { margin-top: 8px; font-size: 12.5px; padding: 8px 10px; }
+  #theirCard .device { cursor: default; }
+
+  /* ── Composer ───────────────────────────────────────────── */
+  #compose { padding: 16px; }
+  .write { position: relative; }
+  .write textarea { background: transparent; box-shadow: none; padding: 6px 4px 20px; min-height: 64px; max-height: 180px; field-sizing: content; font-size: 18px; line-height: 1.4; letter-spacing: -.015em; }
+  .write textarea:focus { background: transparent; box-shadow: none; }
+  .counter { position: absolute; right: 4px; bottom: 2px; font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .2s; }
+  .write:focus-within .counter, .counter.over { opacity: 1; }
+  .counter.over { color: var(--bad); font-weight: 600; }
+
+  .frame { position: relative; margin: 14px auto 0; width: 100%; max-width: 360px; border-radius: 18px; padding: 10px;
+           background: linear-gradient(160deg, #2a2421, #110e0d 65%); box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 18px 36px -18px rgba(30,15,10,.6); }
+  canvas.oled { display: block; width: 100%; aspect-ratio: 2 / 1; image-rendering: pixelated; image-rendering: crisp-edges; background: #000; border-radius: 9px; }
+  /* The wooden case hides the top 6 of 64 rows, so the message preview is
+     cropped the same way rather than marking the hidden band. */
+  .cased { overflow: hidden; border-radius: 9px; aspect-ratio: 128 / 58; background: #000; }
+  .cased canvas.oled { margin-top: calc(-100% * 6 / 128); border-radius: 0; }
+  .msgframe { transition: opacity .35s var(--ease), transform .35s var(--ease); }
+  #paneMsg:has(textarea:placeholder-shown) .msgframe { opacity: .32; transform: scale(.985); }
+
+  .send-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .send-row .meta { flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink-3); }
+  .send { width: 52px; height: 52px; min-height: 0; padding: 0; display: grid; place-items: center; flex: none;
+          box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 80%, transparent); }
+  .send svg { width: 22px; height: 22px; }
+  .send.wide { width: auto; padding: 0 22px 0 18px; display: inline-flex; gap: 9px; font-size: 15.5px; }
+
+  /* GIF */
+  .drop { display: grid; place-items: center; gap: 10px; text-align: center; padding: 34px 12px; border-radius: var(--r-l); color: var(--ink-3); cursor: pointer;
+          background: var(--sunk); box-shadow: inset 0 0 0 1.5px var(--hair); font-size: 14px; transition: box-shadow .2s, color .2s; margin: 0; }
+  .drop:hover { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--ink-2); }
+  .drop svg { width: 28px; height: 28px; color: var(--accent); }
+  .drop strong { color: var(--ink); font-weight: 600; font-size: 15.5px; }
+  #paneGif:has(#gifWork:not(.hidden)) .drop { display: none; }
+  .frame.swap { display: block; cursor: pointer; margin-top: 0; }
+  .frame.swap:hover { transform: translateY(-1px); }
+  details.adjust { margin-top: 12px; }
+  details.adjust > summary { list-style: none; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; padding: 6px 2px; }
+  details.adjust > summary::-webkit-details-marker { display: none; }
+  details.adjust > summary::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .2s; }
+  details.adjust[open] > summary::after { transform: rotate(225deg) translate(-1px, -1px); }
+  .check { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--ink); margin: 10px 0 0; }
+  .check input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+  .check label { margin: 0; color: inherit; font-size: inherit; font-weight: 400; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  /* Time */
+  .time-pane { display: grid; place-items: center; padding: 18px 0 6px; }
+  .time-pane .big-clock { width: 72px; height: 72px; border-radius: 50%; background: var(--sunk); display: grid; place-items: center; color: var(--ink-2); margin-bottom: 4px; box-shadow: inset 0 0 0 1px var(--hair); }
+  .time-pane .big-clock svg { width: 30px; height: 30px; }
+
+  /* Send status */
+  .sendstat { margin-top: 14px; padding: 11px 14px; border-radius: var(--r-m); background: var(--sunk); font-size: 14px; color: var(--ink-2); animation: rise .35s var(--ease); }
+  .sendstat.ok { background: color-mix(in srgb, var(--ok) 13%, var(--surface)); color: var(--ink); }
+  .sendstat.bad { background: color-mix(in srgb, var(--bad) 13%, var(--surface)); color: var(--ink); }
+  .bar { height: 3px; border-radius: 3px; background: var(--hair); margin-top: 9px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 35%; background: var(--accent); border-radius: 3px; animation: slide 1.1s var(--ease) infinite; }
+  @keyframes slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* Settings odds and ends */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { min-height: 34px; padding: 0 12px; background: var(--sunk); color: var(--ink); font-weight: 500; font-size: 13px; }
+  details.more > summary { cursor: pointer; color: var(--ink-3); font-size: 13px; padding: 12px 0 4px; list-style: none; }
+  details.more > summary::-webkit-details-marker { display: none; }
+
+
+  /* ── Wordless status ────────────────────────────────────── */
+  /* Connection: just a dot. Breathing green = connected, amber pulse =
+     connecting, still red = problem, hollow ring = not paired yet. */
+  .pill { font-size: 0; gap: 0; width: 22px; height: 22px; justify-content: center; cursor: default; }
+  .pill::before { width: 8px; height: 8px; opacity: 1; background: var(--ink-3); }
+  .pill.ok::before   { background: var(--ok); animation: breathe 3.2s ease-in-out infinite; }
+  .pill.wait::before { background: var(--warn); animation: blink 1.1s ease-in-out infinite; }
+  .pill.bad::before  { background: var(--bad); }
+  .pill.idle::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+  @keyframes breathe { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 45%, transparent); } 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ok) 0%, transparent); } }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  /* Offline screen: powered down, dim and flat. */
+  .clock[data-mode=off] .device { background: linear-gradient(160deg, #262120, #171413 60%); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 18px -12px rgba(30,15,10,.4); }
+  .clock[data-mode=off] .glass { background: #0b0a09; }
+
+  /* On its way / waiting for the clock to confirm: a slow light sweep. */
+  .glass::before { content: ""; position: absolute; inset: -20% -60%; background: linear-gradient(100deg, transparent 40%, rgba(255,214,200,.16) 50%, transparent 60%); transform: translateX(-60%); opacity: 0; pointer-events: none; }
+  .clock[data-flow=sending] .glass::before { opacity: 1; animation: sweep 1.6s var(--ease) infinite; }
+  @keyframes sweep { to { transform: translateX(60%); } }
+
+  /* Waiting for a sleeping clock: a small ember rests on its screen. */
+  .device::after { content: ""; position: absolute; right: 12px; top: 12px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+                   opacity: 0; transform: scale(.4); transition: opacity .4s var(--ease), transform .4s var(--ease); box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent) 70%, transparent); }
+  .clock[data-flow=queued] .device::after { opacity: 1; transform: none; animation: ember 2.4s ease-in-out infinite; }
+  @keyframes ember { 50% { opacity: .45; box-shadow: 0 0 4px 0 color-mix(in srgb, var(--accent) 50%, transparent); } }
+
+  /* Arrived: the screen blooms and a ring ripples out from it. */
+  .device::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; box-shadow: 0 0 0 0 var(--accent); }
+  .clock[data-flow=arrived] .device::before { animation: ripple 1.4s var(--ease) both; }
+  .clock[data-flow=arrived] .glass { animation: bloom 1.4s var(--ease) both; }
+  .clock[data-flow=arrived] .glyph { filter: drop-shadow(0 0 10px rgba(255,190,170,.9)); }
+  @keyframes ripple { 0% { opacity: .9; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } 100% { opacity: 0; box-shadow: 0 0 0 18px color-mix(in srgb, var(--accent) 0%, transparent); } }
+  @keyframes bloom { 0% { box-shadow: inset 0 0 0 0 rgba(255,150,120,0); } 25% { box-shadow: inset 0 0 26px 2px rgba(255,150,120,.55); } 100% { box-shadow: inset 0 0 0 0 rgba(255,150,120,0); } }
+
+  /* The traveling spark between button and screen. */
+  .spark { position: fixed; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; pointer-events: none; z-index: 9;
+           background: radial-gradient(circle, #fff 0 25%, var(--accent) 60%); box-shadow: 0 0 14px 4px color-mix(in srgb, var(--accent) 60%, transparent); }
+
+  /* Buttons: a ring spins while sending; a gentle shake if it failed. */
+  button[data-state=busy] { position: relative; pointer-events: none; }
+  button[data-state=busy] > * { opacity: 0; }
+  button[data-state=busy]::after { content: ""; position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; border-radius: 50%;
+                                   border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
+  button.wide[data-state=busy] { color: transparent; }
+  button.wide[data-state=busy]::after { border-color: var(--accent-ink); border-right-color: transparent; }
+  button[data-state=failed] { animation: shake .45s var(--ease); background: var(--bad); color: #fff; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+
+  .actions button { display: grid; place-items: center; }
+  .actions button svg { width: 17px; height: 17px; }
+  .clock.msg .actions button { animation: nudge 2.6s ease-in-out infinite; }
+  @keyframes nudge { 0%, 70%, 100% { transform: none; } 80% { transform: translateY(-2px); } 90% { transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Little Screens</h1>
-    <span class="pill" id="conn">offline</span>
-    <button class="icon" id="gear" aria-label="Settings" title="Settings">&#9881;</button>
+    <p class="mark"><i aria-hidden="true"></i>little screens</p>
+    <span class="pill" id="conn" role="status">offline</span>
+    <button class="icon" id="gear" aria-label="Settings" title="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
   </header>
 
   <!-- Pairing / settings -->
   <section class="card hidden" id="settings">
-    <h2 id="settingsTitle">Connect</h2>
+    <h2 id="settingsTitle">Settings</h2>
 
     <div id="pairedPanel" class="hidden stack">
-      <label for="lblMine" style="margin-top:0">Name for my clock</label>
-      <input type="text" id="lblMine" maxlength="24" placeholder="My clock">
-      <label for="lblTheirs">Name for their clock</label>
-      <input type="text" id="lblTheirs" maxlength="24" placeholder="Their clock">
-      <div class="row" style="margin-top:12px"><button id="lblSave">Save names</button><button class="ghost" id="showCode">Show pairing code</button></div>
-      <div id="codeShow" class="hidden">
-        <label for="codeOut">Pairing code (give this to the other person; it contains the key)</label>
-        <textarea id="codeOut" class="mono" readonly></textarea>
-        <button class="ghost big" id="codeCopy" style="margin-top:8px">Copy code</button>
+      <div class="row">
+        <div><label for="lblMine" style="margin-top:0">Mine</label><input type="text" id="lblMine" maxlength="24" placeholder="My clock"></div>
+        <div><label for="lblTheirs" style="margin-top:0">Theirs</label><input type="text" id="lblTheirs" maxlength="24" placeholder="Their clock"></div>
       </div>
-      <details><summary>More</summary>
+      <div class="row" style="margin-top:12px"><button id="lblSave">Save</button><button class="ghost" id="showCode">Pairing code</button></div>
+      <div id="codeShow" class="hidden">
+        <label for="codeOut">Share privately &mdash; it holds the key</label>
+        <textarea id="codeOut" class="mono" readonly></textarea>
+        <button class="ghost big" id="codeCopy" style="margin-top:8px">Copy</button>
+      </div>
+      <details class="more"><summary>More</summary>
         <div class="stack">
-          <button class="ghost big" id="reSetup" style="margin-top:0">Set up a different pairing&hellip;</button>
-          <button class="danger big" id="forget">Forget this pairing</button>
-          <div class="hint">Forgetting only clears this browser. The other person and the clocks keep working.</div>
+          <button class="ghost big" id="reSetup" style="margin-top:6px">Pair differently&hellip;</button>
+          <button class="danger big" id="forget">Forget on this device</button>
         </div>
       </details>
     </div>
@@ -163,10 +312,10 @@
       </div>
 
       <div id="spJoin">
-        <label for="jCode" style="margin-top:0">Paste the pairing code</label>
-        <textarea id="jCode" class="mono" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="DH1:..."></textarea>
+        <label for="jCode" class="sr">Paste the pairing code</label>
+        <textarea id="jCode" class="mono" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Paste the pairing code"></textarea>
         <div id="jStep2" class="hidden">
-          <label for="jMine">Which clock is yours?</label>
+          <label for="jMine">Which one is yours?</label>
           <select id="jMine"></select>
           <button class="big" id="jGo">Join</button>
         </div>
@@ -176,50 +325,49 @@
       <div id="spNew" class="hidden">
         <label for="nHost" style="margin-top:0">Broker host</label>
         <input type="text" id="nHost" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="xxxxxxxx.ala.eu-central-1.emqxsl.com">
-        <label for="nUser">Username</label>
-        <input type="text" id="nUser" autocapitalize="none" autocomplete="off" spellcheck="false">
-        <label for="nPass">Password</label>
-        <input type="password" id="nPass" autocomplete="off">
-        <label for="nWsPort">Websocket port and path</label>
+        <div class="row">
+          <div><label for="nUser">Username</label><input type="text" id="nUser" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+          <div><label for="nPass">Password</label><input type="password" id="nPass" autocomplete="off"></div>
+        </div>
+        <label for="nWsPort">Websocket port &amp; path</label>
         <div class="row"><input type="text" id="nWsPort" inputmode="numeric" autocomplete="off" value="8084"><input type="text" id="nWsPath" autocapitalize="none" autocomplete="off" spellcheck="false" value="/mqtt"></div>
         <label for="nRoot">Topic root</label>
         <input type="text" id="nRoot" autocapitalize="none" autocomplete="off" spellcheck="false" value="displayhub">
         <label for="nA">Clock ids</label>
-        <div class="row"><input type="text" id="nA" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="first clock id"><input type="text" id="nB" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="second clock id"></div>
-        <div class="row" style="margin-top:8px"><button class="ghost" id="nScan">Look for clocks on the broker</button></div>
+        <div class="row"><input type="text" id="nA" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="first"><input type="text" id="nB" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="second"></div>
+        <div class="row" style="margin-top:8px"><button class="ghost" id="nScan">Look for clocks</button></div>
         <div class="chips" id="nChips"></div>
-        <label for="nMine">Which one is mine?</label>
+        <label for="nMine">Mine is</label>
         <select id="nMine"><option value="0">The first</option><option value="1">The second</option></select>
         <button class="big" id="nMake">Create pairing code</button>
         <div class="hint bad hidden" id="nErr"></div>
         <div id="nOut" class="hidden stack" style="margin-top:14px">
-          <label for="nCode" style="margin-top:0">Pairing code &mdash; send it to the other person privately</label>
+          <label for="nCode" style="margin-top:0">Pairing code &mdash; share privately</label>
           <textarea id="nCode" class="mono" readonly></textarea>
           <button class="ghost big" id="nCopy" style="margin-top:0">Copy code</button>
-          <label for="nHex">Key for both clocks&rsquo; secrets.h &rarr; PAIR_KEY_HEX</label>
+          <label for="nHex">Key for both clocks (PAIR_KEY_HEX)</label>
           <input type="text" id="nHex" class="mono" readonly>
           <button class="ghost big" id="nCopyHex" style="margin-top:0">Copy key</button>
-          <button class="big" id="nUse">Start using it</button>
+          <button class="big" id="nUse">Start</button>
         </div>
       </div>
 
       <div id="spAdv" class="hidden">
-        <p class="hint" style="margin-top:0">Manual setup. Any MQTT broker with secure websockets works; EMQX Cloud Serverless has a free tier (port 8084, path /mqtt). Leave the key empty for unencrypted dev mode (the clock must have no PAIR_KEY_HEX).</p>
-        <label for="aHost">Broker host</label>
+        <label for="aHost" style="margin-top:0">Broker host</label>
         <input type="text" id="aHost" autocapitalize="none" autocomplete="off" spellcheck="false">
-        <label for="aUser">Username</label>
-        <input type="text" id="aUser" autocapitalize="none" autocomplete="off" spellcheck="false">
-        <label for="aPass">Password</label>
-        <input type="password" id="aPass" autocomplete="off">
-        <label for="aWsPort">Websocket port and path</label>
+        <div class="row">
+          <div><label for="aUser">Username</label><input type="text" id="aUser" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+          <div><label for="aPass">Password</label><input type="password" id="aPass" autocomplete="off"></div>
+        </div>
+        <label for="aWsPort">Websocket port &amp; path</label>
         <div class="row"><input type="text" id="aWsPort" inputmode="numeric" autocomplete="off" value="8084"><input type="text" id="aWsPath" autocapitalize="none" autocomplete="off" spellcheck="false" value="/mqtt"></div>
         <label for="aRoot">Topic root</label>
         <input type="text" id="aRoot" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="displayhub">
-        <label for="aMine">My clock id</label>
-        <input type="text" id="aMine" autocapitalize="none" autocomplete="off" spellcheck="false">
-        <label for="aTheirs">Their clock id</label>
-        <input type="text" id="aTheirs" autocapitalize="none" autocomplete="off" spellcheck="false">
-        <label for="aKey">Key (64 hex characters, optional)</label>
+        <div class="row">
+          <div><label for="aMine">My clock id</label><input type="text" id="aMine" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+          <div><label for="aTheirs">Their clock id</label><input type="text" id="aTheirs" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+        </div>
+        <label for="aKey">Key (64 hex, optional)</label>
         <input type="text" id="aKey" class="mono" autocapitalize="none" autocomplete="off" spellcheck="false">
         <button class="big" id="aSave">Save &amp; connect</button>
         <div class="hint bad hidden" id="aErr"></div>
@@ -227,78 +375,115 @@
     </div>
   </section>
 
-  <!-- My clock -->
-  <section class="card clock hidden" id="mineCard">
-    <div class="top">
-      <span class="dot" id="mineDot"></span>
-      <span class="grow"><span class="name" id="mineName">My clock</span><span class="sub" id="mineSub">&hellip;</span><span class="key hidden" id="mineKey">Can&rsquo;t read this clock &mdash; key mismatch?</span></span>
-    </div>
-    <div class="actions row">
-      <button class="ghost" id="mineClock">Show clock</button>
-      <button class="ghost" id="mineGif">Show last GIF</button>
-    </div>
-    <div class="sendstat hidden" id="mineStat"></div>
-  </section>
+  <!-- The two little screens -->
+  <div class="pair">
+    <section class="clock hidden" id="mineCard">
+      <div class="device"><div class="glass">
+        <svg class="glyph g-time" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        <svg class="glyph g-gif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>
+        <svg class="glyph g-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4 3v-3h-.5a2 2 0 0 1-2-2z"/></svg>
+        <svg class="glyph g-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9 17V6l10-2v11"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="15" r="2"/></svg>
+        <svg class="glyph g-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.6 6.4L20 12l-6.4 1.6L12 21l-1.6-7.4L4 12l6.4-2.6z"/></svg>
+        <svg class="glyph g-off" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>
+      </div></div>
+      <div class="who"><span class="dot" id="mineDot"></span><span class="name" id="mineName">My clock</span></div>
+      <span class="sub sr" id="mineSub">&hellip;</span>
+      <span class="key hidden" id="mineKey">Key mismatch?</span>
+      <div class="actions">
+        <button id="mineClock" title="Show the clock" aria-label="Show the clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></button>
+        <button id="mineGif" title="Show the last GIF" aria-label="Show the last GIF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg></button>
+      </div>
+      <div class="sendstat hidden" id="mineStat"></div>
+    </section>
 
-  <!-- Their clock -->
-  <section class="card clock hidden" id="theirCard">
-    <div class="top">
-      <span class="dot" id="theirDot"></span>
-      <span class="grow"><span class="name" id="theirName">Their clock</span><span class="sub" id="theirSub">&hellip;</span><span class="key hidden" id="theirKey">Can&rsquo;t read this clock &mdash; key mismatch?</span></span>
-    </div>
-  </section>
+    <section class="clock hidden" id="theirCard">
+      <div class="device"><div class="glass">
+        <svg class="glyph g-time" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        <svg class="glyph g-gif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>
+        <svg class="glyph g-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4 3v-3h-.5a2 2 0 0 1-2-2z"/></svg>
+        <svg class="glyph g-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9 17V6l10-2v11"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="15" r="2"/></svg>
+        <svg class="glyph g-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.6 6.4L20 12l-6.4 1.6L12 21l-1.6-7.4L4 12l6.4-2.6z"/></svg>
+        <svg class="glyph g-off" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>
+      </div></div>
+      <div class="who"><span class="dot" id="theirDot"></span><span class="name" id="theirName">Their clock</span></div>
+      <span class="sub sr" id="theirSub">&hellip;</span>
+      <span class="key hidden" id="theirKey">Key mismatch?</span>
+    </section>
+  </div>
 
+  <!-- Compose for their screen -->
   <section class="card hidden" id="compose">
-    <h2>Send to <span id="toName"></span></h2>
+    <h2 class="sr">To <span id="toName"></span></h2>
     <div class="tabs" role="tablist">
-      <button role="tab" id="tabMsg" aria-selected="true" data-tab="msg">Message</button>
-      <button role="tab" id="tabGif" aria-selected="false" data-tab="gif">GIF</button>
-      <button role="tab" id="tabTime" aria-selected="false" data-tab="time">Show time</button>
+      <button role="tab" id="tabMsg" aria-selected="true" data-tab="msg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4 3v-3h-.5a2 2 0 0 1-2-2z"/></svg>Message</button>
+      <button role="tab" id="tabGif" aria-selected="false" data-tab="gif">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>GIF</button>
+      <button role="tab" id="tabTime" aria-selected="false" data-tab="time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Time</button>
     </div>
 
     <div id="paneMsg">
-      <label for="msgText" style="margin-top:0">Your message</label>
-      <textarea id="msgText" rows="4" placeholder="Thinking of you..."></textarea>
-      <div class="meta"><span class="hint" id="msgHint">&nbsp;</span><span class="counter" id="msgCount">0 / 200</span></div>
-      <div class="screen-wrap"><canvas class="oled" id="msgCanvas" width="128" height="64"></canvas><div class="bezel" title="The case hides the top few rows"></div></div>
-      <div class="hint" style="text-align:center">Approximate preview &mdash; the real font is a little different.</div>
-      <button class="big" id="msgSend">Send message</button>
+      <div class="write">
+        <label for="msgText" class="sr">Message</label>
+        <textarea id="msgText" rows="2" placeholder="Write something&hellip;"></textarea>
+        <span class="counter" id="msgCount">0 / 200</span>
+      </div>
+      <div class="frame msgframe"><div class="cased"><canvas class="oled" id="msgCanvas" width="128" height="64"></canvas></div></div>
+      <div class="send-row">
+        <span class="meta"><span class="hint" id="msgHint" style="margin:0"></span></span>
+        <button class="send" id="msgSend" aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+        </button>
+      </div>
     </div>
 
     <div id="paneGif" class="hidden">
-      <label class="drop" for="gifFile"><strong>Choose a GIF or picture</strong><br>GIF, PNG, JPG or WebP</label>
+      <label class="drop" for="gifFile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 16V5M7 10l5-5 5 5M5 19h14"/></svg>
+        <span><strong>Choose a GIF</strong><br>or any picture</span>
+      </label>
       <input type="file" id="gifFile" accept="image/gif,image/png,image/jpeg,image/webp,.gif,.png,.jpg,.jpeg,.webp" class="hidden">
       <div id="gifWork" class="hidden">
-        <div class="screen-wrap"><canvas class="oled" id="gifCanvas" width="128" height="64"></canvas></div>
-        <div class="meta"><span id="gifInfo">&nbsp;</span><span id="gifSize"></span></div>
-        <label for="gifPreset">Style</label>
-        <select id="gifPreset"></select>
-        <div id="thrBox" class="hidden">
-          <label for="gifThr">Brightness cut-off: <span id="gifThrVal">164</span></label>
-          <input type="range" id="gifThr" min="1" max="254" value="164">
-          <div class="check"><input type="checkbox" id="gifAuto"><label for="gifAuto" style="margin:0;color:inherit;font-size:inherit">Auto (works out the best cut-off)</label></div>
+        <label class="frame swap" for="gifFile" title="Choose a different GIF"><canvas class="oled" id="gifCanvas" width="128" height="64"></canvas></label>
+        <div class="send-row">
+          <span class="meta sr"><span id="gifInfo"></span> <span id="gifSize"></span></span>
+          <span class="meta"></span>
+          <button class="send" id="gifSend" aria-label="Send GIF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+          </button>
         </div>
-        <div class="check"><input type="checkbox" id="gifInvert"><label for="gifInvert" style="margin:0;color:inherit;font-size:inherit">Invert (swap light and dark)</label></div>
-        <label for="gifFps">Speed</label>
-        <select id="gifFps"><option value="">Same as original</option><option value="5">5 fps</option><option value="8">8 fps</option><option value="10">10 fps</option><option value="15">15 fps</option><option value="20">20 fps</option><option value="30">30 fps</option></select>
         <div class="hint" id="gifWarn"></div>
-        <button class="big" id="gifSend">Send GIF</button>
+        <details class="adjust"><summary>Adjust</summary>
+          <label for="gifPreset">Style</label>
+          <select id="gifPreset"></select>
+          <div id="thrBox" class="hidden">
+            <label for="gifThr">Cut-off <span id="gifThrVal">164</span></label>
+            <input type="range" id="gifThr" min="1" max="254" value="164">
+            <div class="check"><input type="checkbox" id="gifAuto"><label for="gifAuto">Auto</label></div>
+          </div>
+          <label for="gifFps">Speed</label>
+          <select id="gifFps"><option value="">Original</option><option value="5">5 fps</option><option value="8">8 fps</option><option value="10">10 fps</option><option value="15">15 fps</option><option value="20">20 fps</option><option value="30">30 fps</option></select>
+          <div class="check"><input type="checkbox" id="gifInvert"><label for="gifInvert">Invert</label></div>
+        </details>
       </div>
     </div>
 
     <div id="paneTime" class="hidden">
-      <p style="margin-top:0">Switch their clock back to showing the time.</p>
-      <button class="big" id="timeSend" style="margin-top:0">Show the time</button>
+      <div class="time-pane">
+        <div class="big-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
+        <button class="send wide" id="timeSend">Show the time</button>
+      </div>
     </div>
 
     <div class="sendstat hidden" id="sendstat"></div>
   </section>
 </div>
 
-<script src="vendor/mqtt.min.js?v=3"></script>
-<script src="vendor/gifuct.js?v=3"></script>
-<script src="oled.js?v=3"></script>
-<script src="crypto.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="vendor/mqtt.min.js?v=4"></script>
+<script src="vendor/gifuct.js?v=4"></script>
+<script src="oled.js?v=4"></script>
+<script src="crypto.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

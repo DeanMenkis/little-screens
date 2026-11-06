@@ -216,7 +216,11 @@
   });
 
   // ── MQTT ───────────────────────────────────────────────────────────────
-  function setConn(text, cls) { var c = $('conn'); c.textContent = text; c.className = 'pill ' + (cls || ''); }
+  function setConn(text, cls) {
+    var c = $('conn');
+    if (!cls) cls = /not set up/.test(text) ? 'idle' : /connecting/.test(text) ? 'wait' : '';
+    c.textContent = text; c.title = text; c.className = 'pill ' + cls;
+  }
 
   function connect() {
     if (client) { try { client.end(true); } catch (e) {} client = null; }
@@ -309,8 +313,12 @@
     show('mineKey', !!(keyBytes && m && m.unreadable)); show('theirKey', !!(keyBytes && t && t.unreadable));
     var onMsg = !!(m && m.online && m.mode === 'MESSAGE');
     $('mineCard').classList.toggle('msg', onMsg);
-    $('mineClock').textContent = onMsg ? 'Dismiss → Clock' : 'Show clock';
-    $('mineGif').textContent = onMsg ? 'Dismiss → Last GIF' : 'Show last GIF';
+    $('mineCard').dataset.mode = m && m.online && !m.unreadable ? (m.mode || 'TIME') : 'off';
+    $('theirCard').dataset.mode = t && t.online && !t.unreadable ? (t.mode || 'TIME') : 'off';
+    var lc = onMsg ? 'Put the message away and show the clock' : 'Show the clock';
+    var lg = onMsg ? 'Put the message away and show the last GIF' : 'Show the last GIF';
+    $('mineClock').title = lc; $('mineClock').setAttribute('aria-label', lc);
+    $('mineGif').title = lg; $('mineGif').setAttribute('aria-label', lg);
   }
 
   // ── Tabs ───────────────────────────────────────────────────────────────
@@ -329,7 +337,7 @@
   // ── Send status ────────────────────────────────────────────────────────
   function hideSendStat() { $('sendstat').classList.add('hidden'); }
   function setSendStat(el, text, cls, busy) {
-    el.className = 'sendstat ' + (cls || ''); el.textContent = '';
+    el.className = 'sendstat ' + (cls || '') + (cls === 'bad' ? '' : ' sr'); el.textContent = '';
     var t = document.createElement('div'); t.textContent = text; el.appendChild(t);
     if (busy) { var b = document.createElement('div'); b.className = 'bar'; b.appendChild(document.createElement('i')); el.appendChild(b); }
   }
@@ -346,8 +354,49 @@
     if (!pending || pending.state !== 'sent') return;
     if (isDelivered(pending)) {
       pending.state = 'delivered';
-      setSendStat(pending.el, 'Delivered ✓  —  ' + labelFor(pending.device) + ' has it.', 'ok');
+      setSendStat(pending.el, 'Delivered — ' + labelFor(pending.device) + ' has it.', 'ok');
+      flow(pending.device, 'arrived');
     }
+  }
+
+  // ── Wordless status ────────────────────────────────────────────────────
+  // The clock card shows where a send is: a shimmer while it's on its way, a
+  // small ember parked on a sleeping screen until it wakes, a ripple when it
+  // lands. The button that started it spins, or shakes if it failed.
+  var trigger = null;
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button');
+    if (b && /^(msgSend|gifSend|timeSend|mineClock|mineGif)$/.test(b.id)) trigger = b;
+  }, true);
+  function cardOf(id) { return cfg && $(id === cfg.mine ? 'mineCard' : 'theirCard'); }
+  function flow(id, state) {
+    var c = cardOf(id); if (!c) return;
+    clearTimeout(c._flowT);
+    c.dataset.flow = '';
+    void c.offsetWidth;                       // restart the animation on repeat sends
+    c.dataset.flow = state || '';
+    if (state === 'arrived') c._flowT = setTimeout(function () { c.dataset.flow = ''; }, 2200);
+  }
+  function btnState(b, state) {
+    if (!b) return;
+    clearTimeout(b._stT);
+    b.dataset.state = state || '';
+    if (state === 'failed') b._stT = setTimeout(function () { b.dataset.state = ''; }, 900);
+  }
+  // A small glowing dot flies from the button to the clock it was sent to.
+  function fly(fromEl, id) {
+    var c = cardOf(id), to = c && c.querySelector('.glass');
+    if (!fromEl || !to || !fromEl.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var a = fromEl.getBoundingClientRect(), z = to.getBoundingClientRect();
+    var x0 = a.left + a.width / 2, y0 = a.top + a.height / 2, x1 = z.left + z.width / 2, y1 = z.top + z.height / 2;
+    var dot = document.createElement('i'); dot.className = 'spark'; document.body.appendChild(dot);
+    var mx = (x0 + x1) / 2 + (x1 > x0 ? -40 : 40), my = Math.min(y0, y1) - 40;
+    dot.animate([
+      { transform: 'translate(' + x0 + 'px,' + y0 + 'px) scale(1)', opacity: 0 },
+      { transform: 'translate(' + x0 + 'px,' + y0 + 'px) scale(1.2)', opacity: 1, offset: .08 },
+      { transform: 'translate(' + mx + 'px,' + my + 'px) scale(.9)', opacity: 1, offset: .55 },
+      { transform: 'translate(' + x1 + 'px,' + y1 + 'px) scale(.35)', opacity: .9 }
+    ], { duration: 760, easing: 'cubic-bezier(.45,.05,.25,1)' }).onfinish = function () { dot.remove(); };
   }
   function offlineNote(id) {
     var d = devices[id];
@@ -357,15 +406,19 @@
   // Common send wrapper.
   function doSend(id, kind, payload, ts, extra, label, el) {
     pending = { device: id, kind: kind, ts: ts, mode: extra && extra.mode, state: 'sending', el: el };
-    var p = pending, kb = payload.length;
+    var p = pending, kb = payload.length, b = trigger; trigger = null;
+    btnState(b, 'busy'); flow(id, 'sending');
     setSendStat(el, 'Sending ' + label + (kb > 2048 ? ' (' + Math.round(kb / 1024) + ' KB)' : '') + '…', '', true);
     return publish(id, kind, payload).then(function () {
       if (pending !== p) return;
-      p.state = 'sent';
-      if (isDelivered(p)) { p.state = 'delivered'; setSendStat(el, 'Delivered ✓  —  ' + labelFor(id) + ' has it.', 'ok'); }
-      else setSendStat(el, 'Sent ✓.' + (offlineNote(id) || ' Waiting for ' + labelFor(id) + ' to confirm…'), 'ok', !offlineNote(id));
+      p.state = 'sent'; btnState(b, ''); fly(b, id);
+      if (isDelivered(p)) { p.state = 'delivered'; setSendStat(el, 'Delivered — ' + labelFor(id) + ' has it.', 'ok'); setTimeout(function () { flow(id, 'arrived'); }, 700); }
+      else {
+        setSendStat(el, 'Sent.' + (offlineNote(id) || ' Waiting for ' + labelFor(id) + ' to confirm…'), 'ok');
+        setTimeout(function () { if (p.state === 'sent') flow(id, offlineNote(id) ? 'queued' : 'sending'); }, 700);
+      }
     }).catch(function (e) {
-      if (pending === p) { p.state = 'failed'; setSendStat(el, 'Couldn’t send: ' + (e && e.message || e), 'bad'); }
+      if (pending === p) { p.state = 'failed'; btnState(b, 'failed'); flow(id, ''); setSendStat(el, 'Couldn’t send: ' + (e && e.message || e), 'bad'); }
     });
   }
 
@@ -446,7 +499,10 @@
     if (!cfg) return;
     var ts = nextTs(cfg.theirs), text = $('msgText').value;
     $('msgSend').disabled = true;
-    doSend(cfg.theirs, 'msg', OLED.msgPayload(ts, '', text), ts, null, 'your message', $('sendstat')).then(function () { updateMessage(); });
+    doSend(cfg.theirs, 'msg', OLED.msgPayload(ts, '', text), ts, null, 'your message', $('sendstat')).then(function () {
+      if (pending && pending.ts === ts && pending.state !== 'failed') $('msgText').value = '';
+      updateMessage();
+    });
   });
 
   // ── Time tab ───────────────────────────────────────────────────────────
