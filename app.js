@@ -77,7 +77,8 @@
     show('settings', on);
     if (!on) return;
     var paired = !!cfg;
-    $('settingsTitle').textContent = paired ? 'Settings' : 'Welcome — let’s pair';
+    $('settingsTitle').textContent = 'Settings';
+    show('settingsTitle', paired);
     show('pairedPanel', paired); show('setupPanel', !paired);
     if (paired) {
       $('lblMine').value = (cfg.labels && cfg.labels.mine) || ''; $('lblTheirs').value = (cfg.labels && cfg.labels.theirs) || '';
@@ -93,7 +94,8 @@
   });
   $('showCode').addEventListener('click', function () {
     if (!keyBytes) return;
-    $('codeOut').value = DHC.encodePairing({ host: cfg.host, user: cfg.user, pass: cfg.pass, root: rootOf(cfg), wsport: cfg.wsport, wspath: cfg.wspath, key: keyBytes, devices: [cfg.mine, cfg.theirs] });
+    var names = {}; names[cfg.mine] = (cfg.labels && cfg.labels.mine) || ''; names[cfg.theirs] = (cfg.labels && cfg.labels.theirs) || '';
+    $('codeOut').value = DHC.encodePairing({ host: cfg.host, user: cfg.user, pass: cfg.pass, root: rootOf(cfg), wsport: cfg.wsport, wspath: cfg.wspath, key: keyBytes, devices: [cfg.mine, cfg.theirs], names: names });
     show('codeShow', true);
   });
   $('codeCopy').addEventListener('click', function () { copyText($('codeOut').value, $('codeOut'), this); });
@@ -135,14 +137,14 @@
     try {
       joined = DHC.decodePairing(v); err('jErr', '');
       var sel = $('jMine'); sel.textContent = '';
-      joined.devices.forEach(function (id) { var o = document.createElement('option'); o.value = id; o.textContent = id; sel.appendChild(o); });
+      joined.devices.forEach(function (id) { var o = document.createElement('option'); o.value = id; o.textContent = joined.names[id] ? joined.names[id] + ' (' + id + ')' : id; sel.appendChild(o); });
       show('jStep2', true);
     } catch (e) { err('jErr', e.message); }
   });
   $('jGo').addEventListener('click', function () {
     if (!joined) return;
     var mine = $('jMine').value, theirs = joined.devices[0] === mine ? joined.devices[1] : joined.devices[0];
-    adopt({ host: cleanHost(joined.host), user: joined.user, pass: joined.pass, root: joined.root, wsport: joined.wsport, wspath: joined.wspath, keyB64: DHC.bytesToB64(joined.key), mine: mine, theirs: theirs, labels: {} });
+    adopt({ host: cleanHost(joined.host), user: joined.user, pass: joined.pass, root: joined.root, wsport: joined.wsport, wspath: joined.wspath, keyB64: DHC.bytesToB64(joined.key), mine: mine, theirs: theirs, labels: { mine: joined.names[mine] || '', theirs: joined.names[theirs] || '' } });
     $('jCode').value = ''; joined = null;
   });
 

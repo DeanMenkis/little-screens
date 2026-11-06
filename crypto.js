@@ -104,12 +104,19 @@
 
   // ── Pairing code: "DH1:" + base64url(JSON) ──
   var ID_RE = /^[A-Za-z0-9_.-]{1,64}$/;
+  function cleanName(n) { return typeof n === 'string' ? n.trim().slice(0, 24) : ''; }
   function encodePairing(p) {
     var o = {
       v: 1, host: p.host, user: p.user, pass: p.pass, root: p.root || 'displayhub',
       wsport: p.wsport || 8084, wspath: p.wspath || '/mqtt',
       key: bytesToB64(p.key), devices: [p.devices[0], p.devices[1]]
     };
+    // Optional display names per device id, so both people see the same labels.
+    if (p.names) {
+      var nm = {};
+      p.devices.forEach(function (id) { var n = cleanName(p.names[id]); if (n) nm[id] = n; });
+      if (Object.keys(nm).length) o.names = nm;
+    }
     return PAIR_PREFIX + bytesToB64url(utf8(JSON.stringify(o)));
   }
   // Returns {host,user,pass,root,key:Uint8Array,devices:[a,b]} or throws Error with a friendly message.
@@ -131,7 +138,9 @@
     var wsport = o.wsport === undefined ? 8084 : +o.wsport, wspath = o.wspath === undefined ? '/mqtt' : String(o.wspath);
     if (!(wsport >= 1 && wsport <= 65535 && wsport === Math.floor(wsport))) throw new Error('The websocket port in that code isn’t valid.');
     if (wspath.charAt(0) !== '/' || /\s/.test(wspath)) throw new Error('The websocket path in that code isn’t valid.');
-    return { wsport: wsport, wspath: wspath, host: String(o.host), user: String(o.user), pass: o.pass, root: rt, key: key, devices: [o.devices[0], o.devices[1]] };
+    var names = {};
+    if (o.names && typeof o.names === 'object') o.devices.forEach(function (id) { var n = cleanName(o.names[id]); if (n) names[id] = n; });
+    return { wsport: wsport, wspath: wspath, host: String(o.host), user: String(o.user), pass: o.pass, root: rt, key: key, devices: [o.devices[0], o.devices[1]], names: names };
   }
 
   var DHC = {
